@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ប្រព័ន្ធគ្រប់គ្រងអ្នកប្រើប្រាស់ (AppUser Management)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font (Kantumruy Pro) -->
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800">
+
+    <!-- 1. Form សម្រាប់ Login -->
+    <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="inline-flex p-4 rounded-full bg-indigo-50 text-indigo-600 mb-4">
+                    <i class="fa-solid fa-lock text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">ចូលប្រព័ន្ធ</h2>
+                <p class="text-sm text-slate-500 mt-1">សូមបញ្ចូលអ៊ីមែល និងពាក្យសម្ងាត់របស់អ្នក</p>
+            </div>
+
+            <div id="loginAlert" class="hidden mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded"></div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">អ៊ីមែល (Email)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-regular fa-envelope"></i>
+                        </span>
+                        <input type="email" id="loginEmail" required placeholder="admin@example.com" 
+                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ពាក្យសម្ងាត់ (Password)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-key"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="••••••••" 
+                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                    ចូលប្រព័ន្ធ
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Dashboard គ្រប់គ្រង CRUD (បង្ហាញក្រោយពេល Login ជោគជ័យ) -->
+    <div id="appSection" class="hidden min-h-screen flex flex-col">
+        <!-- Navigation Bar -->
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-indigo-600 text-white p-2 rounded-lg">
+                            <i class="fa-solid fa-users text-xl"></i>
+                        </div>
+                        <span class="font-bold text-xl text-slate-800">គ្រប់គ្រង AppUser</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="handleLogout()" class="flex items-center text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition">
+                            <i class="fa-solid fa-right-from-bracket mr-2"></i> ចាកចេញ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Table Header Section -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">បញ្ជីឈ្មោះអ្នកប្រើប្រាស់</h1>
+                    <p class="text-sm text-slate-500">គ្រប់គ្រងទិន្នន័យអ្នកប្រើប្រាស់ទាំងអស់នៅក្នុងប្រព័ន្ធ</p>
+                </div>
+                <button onclick="openCreateModal()" class="flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg shadow transition">
+                    <i class="fa-solid fa-plus mr-2"></i> បន្ថែមអ្នកប្រើប្រាស់ថ្មី
+                </button>
+            </div>
+
+            <!-- Global Alert -->
+            <div id="crudAlert" class="hidden mb-4 p-4 rounded-lg text-sm"></div>
+
+            <!-- Table Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                <th class="py-3.5 px-6">ID</th>
+                                <th class="py-3.5 px-6">ឈ្មោះ</th>
+                                <th class="py-3.5 px-6">អ៊ីមែល</th>
+                                <th class="py-3.5 px-6 text-center">សកម្មភាព</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody" class="divide-y divide-slate-200 text-sm">
+                            <!-- រាយបញ្ជីទិន្នន័យ dynamically ដោយ JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 3. Modal សម្រាប់ Create / Edit AppUser -->
+    <div id="userModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-800">បន្ថែមអ្នកប្រើប្រាស់</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <form id="userForm" onsubmit="handleSaveUser(event)" class="p-6 space-y-4">
+                <input type="hidden" id="userId">
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ឈ្មោះ (Name)</label>
+                    <input type="text" id="userName" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">អ៊ីមែល (Email)</label>
+                    <input type="email" id="userEmail" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50">បោះបង់</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow">រក្សាទុក</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // API Base Endpoints
+        const AUTH_API = '/api/AuthApi/login';
+        const USER_API = '/api/AppUserApi';
+
+        let jwtToken = localStorage.getItem('jwtToken') || '';
+
+        // ពិនិត្យមើល Auth State នៅពេល Load ទំព័រ
+        document.addEventListener('DOMContentLoaded', () => {
+            if (jwtToken) {
+                showAppUI();
+                loadUsers();
+            } else {
+                showLoginUI();
+            }
+        });
+
+        function showLoginUI() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('appSection').classList.add('hidden');
+        }
+
+        function showAppUI() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('appSection').classList.remove('hidden');
+        }
+
+        // 1. ប្រព័ន្ធ Login យក JWT Token
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const alertBox = document.getElementById('loginAlert');
+
+            alertBox.classList.add('hidden');
+
+            try {
+                const response = await fetch(AUTH_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    jwtToken = data.token;
+                    localStorage.setItem('jwtToken', jwtToken);
+                    showAppUI();
+                    loadUsers();
+                } else {
+                    const errorText = await response.text();
+                    alertBox.textContent = errorText || 'អ៊ីមែល ឬ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ!';
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                alertBox.textContent = 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!';
+                alertBox.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            jwtToken = '';
+            localStorage.removeItem('jwtToken');
+            showLoginUI();
+        }
+
+        // Helper Headers ដែលរួមបញ្ចូល Bearer Token
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`
+            };
+        }
+
+        // 2. ទាញយកបញ្ជី AppUser (GET)
+        async function loadUsers() {
+            try {
+                const response = await fetch(USER_API, {
+                    headers: getAuthHeaders()
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    showAlert('សូមចូលប្រព័ន្ធឡើងវិញ!', 'error');
+                    handleLogout();
+                    return;
+                }
+
+                const users = await response.json();
+                renderTable(users);
+            } catch (err) {
+                showAlert('មានបញ្ហាក្នុងការទាញយកទិន្នន័យ', 'error');
+            }
+        }
+
+        function renderTable(users) {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">គ្មានទិន្នន័យទេ</td></tr>`;
+                return;
+            }
+
+            users.forEach(user => {
+                const userId = user.id || user.Id;
+                const fullName = user.fullName || user.FullName || user.name || user.Name || 'N/A';
+                const emailAddr = user.email || user.Email || 'N/A';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-4 px-6 font-medium text-slate-900">${userId}</td>
+                        <td class="py-4 px-6">${fullName}</td>
+                        <td class="py-4 px-6 text-slate-600">${emailAddr}</td>
+                        <td class="py-4 px-6 text-center space-x-2">
+                            <button onclick="openEditModal(${userId}, '${fullName}', '${emailAddr}')" 
+                                class="text-amber-600 hover:text-amber-800 bg-amber-50 p-2 rounded-lg transition">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteUser(${userId})" 
+                                class="text-red-600 hover:text-red-800 bg-red-50 p-2 rounded-lg transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Modal Handlers
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'បន្ថែមអ្នកប្រើប្រាស់';
+            document.getElementById('userId').value = '';
+            document.getElementById('userName').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function openEditModal(id, name, email) {
+            document.getElementById('modalTitle').textContent = 'កែប្រែអ្នកប្រើប្រាស់';
+            document.getElementById('userId').value = id;
+            document.getElementById('userName').value = name;
+            document.getElementById('userEmail').value = email;
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').classList.add('hidden');
+        }
+
+        // 3. បង្កើត ឬ កែប្រែ AppUser (POST / PUT)
+        async function handleSaveUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('userId').value;
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+
+            const userData = { FullName: name, Email: email };
+            if (id) userData.Id = parseInt(id);
+
+            const isEdit = !!id;
+            const url = isEdit ? `${USER_API}/${id}` : USER_API;
+            const method = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    closeModal();
+                    loadUsers();
+                    showAlert(isEdit ? 'កែប្រែបានជោគជ័យ!' : 'បង្កើតបានជោគជ័យ!', 'success');
+                } else if (response.status === 403) {
+                    showAlert('អ្នកគ្មានសិទ្ធិ (Require Admin Role) ក្នុងការធ្វើប្រតិបត្តិការនេះទេ!', 'error');
+                } else {
+                    showAlert('មានបញ្ហាក្នុងការរក្សាទុកទិន្នន័យ', 'error');
+                }
+            } catch (err) {
+                showAlert('មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server', 'error');
+            }
+        }
+
+        // 4. លុប AppUser (DELETE)
+        async function deleteUser(id) {
+            if (!confirm('តើអ្នកពិតជាចង់លុបអ្នកប្រើប្រាស់នេះមែនទេ?')) return;
+
+            try {
+                const response = await fetch(`${USER_API}/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    loadUsers();
+                    showAlert('លុបទិន្នន័យបានជោគជ័យ!', 'success');
+                } else if (response.status === 403) {
+                    showAlert('អ្នកគ្មានសិទ្ធិ (Require Admin Role) ក្នុងការលុបទិន្នន័យទេ!', 'error');
+                } else {
+                    showAlert('មិនអាចលុបទិន្នន័យបានទេ', 'error');
+                }
+            } catch (err) {
+                showAlert('មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server', 'error');
+            }
+        }
+
+        // Alert Message Helper
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('crudAlert');
+            alertBox.textContent = message;
+            alertBox.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+
+            if (type === 'success') {
+                alertBox.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                alertBox.classList.add('bg-red-100', 'text-red-800');
+            }
+
+            setTimeout(() => { alertBox.classList.add('hidden'); }, 4000);
+        }
+    </script>
+</body>
+</html>

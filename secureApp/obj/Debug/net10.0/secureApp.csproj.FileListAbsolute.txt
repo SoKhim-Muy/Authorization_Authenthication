@@ -171,4 +171,4 @@ D:\ASPdotNet\Authorization_Authenthication\secureApp\obj\Debug\net10.0\secureApp
 D:\ASPdotNet\Authorization_Authenthication\secureApp\obj\Debug\net10.0\secureApp.genruntimeconfig.cache
 D:\ASPdotNet\Authorization_Authenthication\secureApp\obj\Debug\net10.0\ref\secureApp.dll
 D:\ASPdotNet\Authorization_Authenthication\secureApp\bin\Debug\net10.0\secureApp.staticwebassets.runtime.json
-D:\ASPdotNet\Authorization_Authenthication\secureApp\obj\Debug\net10.0\compressed\2aq98fnbqu-{0}-em4dz839o8-em4dz839o8.gz
+D:\ASPdotNet\Authorization_Authenthication\secureApp\obj\Debug\net10.0\compressed\2aq98fnbqu-{0}-owjn6gqmm1-owjn6gqmm1.gz
